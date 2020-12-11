@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/home.dart';
 import 'package:flutter_app/widgets/global_process.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 void main() => runApp(App());
+
+final GlobalKey<GlobalProcessBarState> progressBarKey =  GlobalKey<GlobalProcessBarState>();
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
 
 class App extends StatelessWidget {
   @override
@@ -36,7 +39,7 @@ class App extends StatelessWidget {
         //   return
         // },
         navigatorObservers: [MyNavigatorObserver()],
-        home: GlobalProcessBar(child: Home()),
+        home: GlobalProcessBar( child: Home()),
         routes: <String, WidgetBuilder>{
           "/about": (context) => Scaffold(
                 appBar: AppBar(

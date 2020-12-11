@@ -1,65 +1,97 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/node/node.dart';
+import 'package:flutter_app/widgets/global_process.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-typedef GetData<T> = Future<List<T>> Function<T>();
+typedef PageItemBuilder<T> = Widget Function(BuildContext context, int index, List<T> items);
 
-class Page<T> extends StatefulWidget {
+
+class ListPage<T> extends StatefulWidget {
   @override
-  _PageState<T> createState() => _PageState();
+  _ListPageState<T> createState() => _ListPageState();
 
-  final GetData<T> getData;
-  final GlobalKey<ScaffoldState> scaffoldKey;
+  final Function getData;
 
-  Page(this.getData, this.scaffoldKey,);
+  final PageItemBuilder<T> pageItemBuilder;
+
+  ListPage(
+    this.getData,
+    this.pageItemBuilder,
+  );
 }
 
-class _PageState<T> extends State<Page> {
-  List<T> items = [];
-
-  ScaffoldState _scaffoldState;
-
-  get() => widget.scaffoldKey.currentState;
+class _ListPageState<T> extends State<ListPage> {
+  List<T> items = List.empty(growable: true);
+  bool isFirstLoad = true;
 
   RefreshController _refreshController =
-  RefreshController(initialRefresh: true);
+      RefreshController(initialRefresh: true);
 
   void _onRefresh() async {
-    // monitor network fetch
+    widget.getData().timeout(Duration(seconds: 5)).then((value) {
+      if (mounted) {
+        setState(() {
+          items.clear();
+          items.addAll(value);
+        });
+      }
+    }).catchError(
+      (error) {
+        var errorStr = "";
+        switch (error) {
+          case TimeoutException:
+            break;
+          default :
+            // errorStr = errorStr.runtimeType.toString();
+            break;
+        }
+        errorStr = error.runtimeType.toString();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorStr)));
+      }
+    ).whenComplete(() {
+        if (isFirstLoad) {
+          isFirstLoad = false;
+          GlobalProcessBar.of(context).showProcess = false;
+        }
+        _refreshController.refreshCompleted();
+      });
+  }
 
+  void _onLoading() async {
     widget.getData<T>().timeout(Duration(seconds: 5)).then((value) {
-      items.clear();
       items.addAll(value);
       if (mounted) {
         setState(() {});
       }
-    }).catchError(() {
-      _scaffoldState.showSnackBar(SnackBar(content:Text("Time Out")));
-    }, test: (error) => error is TimeoutException,)
-    .catchError((){
-      _scaffoldState.showSnackBar(SnackBar(content: Text("Unknown Error")));
-    }).whenComplete(() => {
-      _scaffoldState.
+    }).catchError(
+      (error) {
+        Scaffold.of(context).showSnackBar(SnackBar(content: Text("Time Out")));
+        _refreshController.loadFailed();
+      },
+      test: (error) => error is TimeoutException,
+    ).catchError((error) {
+      print(error.runtimeType);
+      Scaffold.of(context)
+          .showSnackBar(SnackBar(content: Text(error.stackTrace.toString())));
+    }).whenComplete(() {
+      GlobalProcessBar.of(context).showProcess = false;
+      _refreshController.loadComplete();
     });
 
-    if (mounted) {
-      setState(() {});
-    }
-    // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
-  }
-
-  void _onLoading() async {
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use loadFailed(),if no data return,use LoadNodata()
-    if (mounted) setState(() {});
-    _refreshController.loadComplete();
+    GlobalProcessBar.of(context).showProcess = true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return SmartRefresher(
+      controller: _refreshController,
+      onRefresh: _onRefresh,
+      onLoading: _onLoading,
+      enablePullUp: true,
+      child: ListView.builder(
+          itemCount: items.length, itemBuilder:  widget.pageItemBuilder,),
+    );
   }
 }
