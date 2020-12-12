@@ -9,20 +9,27 @@ class NodePage extends StatefulWidget {
 }
 
 class _NodePageState extends State<NodePage> {
+  final data = <Node>[];
+
   @override
   Widget build(BuildContext context) {
-    return ListPage<Node>(_getData, itemBuilder);
+    return ListPage<Node>(data , _getData, getItemBuilder());
   }
 
-  _getData(){
-    return api.getNodes();
+  Future<List<Node>> _getData() {
+    return api.getNodes().then((List<Node> nodes) {
+      nodes.retainWhere((Node element) => element.parentNodeName == "v2ex");
+      return nodes;
+    });
+  }
+
+  IndexedWidgetBuilder getItemBuilder() {
+    return (BuildContext context, index) {
+      return Card(
+        child: Center(
+          child: Text(data[index].title),
+        ),
+      );
+    };
   }
 }
-
-
-
-var itemBuilder = (context, index,List<Node> items) => Card(
-      child: Center(
-        child: Text(items[index].name),
-      ),
-    );

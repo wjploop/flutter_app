@@ -45,7 +45,7 @@ class _TopicPageState extends State<TopicPage> {
         itemBuilder: (context, index) {
           return Card(
             child: Center(
-              child: Text(items[index]),
+              child: Text(index.toString()),
             ),
           );
         },

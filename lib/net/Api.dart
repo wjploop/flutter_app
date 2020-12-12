@@ -75,6 +75,6 @@ Api createApi() {}
 
 Dio createDio() {
   var dio = Dio();
-  dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+  dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: true,requestHeader:false,responseHeader: false));
   return dio;
 }

@@ -5,63 +5,62 @@ import 'package:flutter_app/node/node.dart';
 import 'package:flutter_app/widgets/global_process.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-typedef PageItemBuilder<T> = Widget Function(BuildContext context, int index, List<T> items);
-
-
 class ListPage<T> extends StatefulWidget {
   @override
-  _ListPageState<T> createState() => _ListPageState();
+  ListPageState<T> createState() => ListPageState();
+
+  final List<T> data;
 
   final Function getData;
 
-  final PageItemBuilder<T> pageItemBuilder;
+  final IndexedWidgetBuilder itemBuilder;
 
-  ListPage(
-    this.getData,
-    this.pageItemBuilder,
-  );
+  ListPage(this.data, this.getData, this.itemBuilder);
 }
 
-class _ListPageState<T> extends State<ListPage> {
-  List<T> items = List.empty(growable: true);
+class ListPageState<T> extends State<ListPage> {
   bool isFirstLoad = true;
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: true);
 
   void _onRefresh() async {
-    widget.getData().timeout(Duration(seconds: 5)).then((value) {
+    widget.getData().timeout(Duration(seconds: 5)).then((List<T> value) {
       if (mounted) {
         setState(() {
-          items.clear();
-          items.addAll(value);
+          if (value.isEmpty) {
+            _refreshController.loadNoData();
+          } else {
+            widget.data.clear();
+            widget.data.addAll(value);
+          }
         });
       }
-    }).catchError(
-      (error) {
-        var errorStr = "";
-        switch (error) {
-          case TimeoutException:
-            break;
-          default :
-            // errorStr = errorStr.runtimeType.toString();
-            break;
-        }
-        errorStr = error.runtimeType.toString();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorStr)));
+    }).catchError((error) {
+      var errorStr = "";
+      switch (error.runtimeType) {
+        case TimeoutException:
+          break;
+        default:
+          // errorStr = errorStr.runtimeType.toString();
+          break;
       }
-    ).whenComplete(() {
-        if (isFirstLoad) {
-          isFirstLoad = false;
-          GlobalProcessBar.of(context).showProcess = false;
-        }
-        _refreshController.refreshCompleted();
-      });
+      errorStr = error.runtimeType.toString();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorStr)));
+      print(error.stackTrace);
+    }).whenComplete(() {
+      if (isFirstLoad) {
+        isFirstLoad = false;
+        GlobalProcessBar.of(context).showProcess = false;
+      }
+      _refreshController.refreshCompleted();
+    });
   }
 
   void _onLoading() async {
     widget.getData<T>().timeout(Duration(seconds: 5)).then((value) {
-      items.addAll(value);
+      widget.data.addAll(value);
       if (mounted) {
         setState(() {});
       }
@@ -91,7 +90,9 @@ class _ListPageState<T> extends State<ListPage> {
       onLoading: _onLoading,
       enablePullUp: true,
       child: ListView.builder(
-          itemCount: items.length, itemBuilder:  widget.pageItemBuilder,),
+        itemCount: widget.data.length,
+        itemBuilder: widget.itemBuilder,
+      ),
     );
   }
 }

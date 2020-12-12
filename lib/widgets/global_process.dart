@@ -18,9 +18,11 @@ class GlobalProcessBarState extends State<GlobalProcessBar> {
   bool show = false;
 
   set showProcess (bool show){
-    setState(() {
-      this.show = show;
-    });
+    if(mounted) {
+      setState(() {
+        this.show = show;
+      });
+    }
   }
 
 
