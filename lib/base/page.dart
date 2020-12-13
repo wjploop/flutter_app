@@ -25,7 +25,7 @@ class ListPageState<T> extends State<ListPage> {
       RefreshController(initialRefresh: true);
 
   void _onRefresh() async {
-    widget.getData().timeout(Duration(seconds: 5)).then((List<T> value) {
+    widget.getData().timeout(Duration(seconds: 10)).then((List<T> value) {
       if (mounted) {
         setState(() {
           if (value.isEmpty) {

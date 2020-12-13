@@ -7,7 +7,7 @@ class TopicPage extends StatefulWidget {
   _TopicPageState createState() => _TopicPageState();
 }
 
-class _TopicPageState extends State<TopicPage> {
+class _TopicPageState extends State<TopicPage> with AutomaticKeepAliveClientMixin {
   List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
   RefreshController _refreshController =
@@ -34,6 +34,7 @@ class _TopicPageState extends State<TopicPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SmartRefresher(
       controller: _refreshController,
       onRefresh: _onRefresh,
@@ -52,4 +53,7 @@ class _TopicPageState extends State<TopicPage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

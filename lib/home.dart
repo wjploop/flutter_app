@@ -15,9 +15,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var tabs = <Tab>[Tab(text: "全部"), Tab(text: "消息"), Tab(text: "节点")];
 
   var pages = [
+    NodePage(),
     TopicPage(),
     MessagePage(),
-    NodePage(),
   ];
 
   TabController _tabController;
