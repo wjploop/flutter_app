@@ -16,7 +16,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   var pages = [
     NodePage(),
-    TopicPage(),
+    TopicListPage(),
     MessagePage(),
   ];
 

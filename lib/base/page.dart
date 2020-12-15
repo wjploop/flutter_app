@@ -48,7 +48,6 @@ class ListPageState<T> extends State<ListPage> {
       errorStr = error.runtimeType.toString();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorStr)));
-      print(error.stackTrace);
     }).whenComplete(() {
       if (isFirstLoad) {
         isFirstLoad = false;
