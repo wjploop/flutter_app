@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_app/base/page.dart';
 import 'package:flutter_app/data/node.dart';
 import 'package:flutter_app/net/Api.dart';
@@ -17,15 +18,15 @@ class _NodePageState extends State<NodePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ListPage<NodeParent>(data, _getData, getItemBuilder());
+    return ListPage<NodeParent>(
+      data,
+      _getData,
+      getItemBuilder(),
+      enableLoadMore: false,
+    );
   }
 
   Future<List<NodeParent>> _getData() {
-    // return api.getNodes().then((List<Node> nodes) {
-    //   nodes.sort((Node a,Node b)=> b.stars.compareTo(a.stars));
-    //   nodes.take(100);
-    //   return nodes;
-    // }
     return myApi.nodes();
   }
 
@@ -33,16 +34,50 @@ class _NodePageState extends State<NodePage>
     return (BuildContext context, index) {
       NodeParent nodeParent = data[index];
       return Container(
+        margin: EdgeInsets.only(left: 12, right: 12,top: 8),
         child: Column(
           children: [
-            Text(nodeParent.parent),
-            ListView(
-              physics: ClampingScrollPhysics(),
-              shrinkWrap: true,
-              children: nodeParent.nodes
-                  .map((e) => ListTile(title: Text(e.name)))
-                  .toList(),
-            )
+            Padding(
+              padding: EdgeInsets.only(top: 8,bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 3,
+                    height: 16,
+                    decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.all(Radius.circular(2))),
+                  ),
+                  SizedBox(
+                    width: 4,
+                  ),
+                  Text(nodeParent.parent),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 0,
+                alignment: WrapAlignment.start,
+                children: nodeParent.nodes
+                    .map((e) => ActionChip(
+                          visualDensity: VisualDensity.comfortable,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(4))),
+                          backgroundColor: Colors.grey[200],
+                          label: Text(
+                            e.name,
+                            style: TextStyle(fontSize: 13),
+                          ),
+                          onPressed: () {},
+                        ))
+                    .toList(),
+              ),
+            ),
           ],
         ),
       );

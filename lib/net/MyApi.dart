@@ -6,7 +6,6 @@ import 'package:html/parser.dart';
 
 MyApi get myApi => MyApi._singleton;
 
-
 class MyApi {
   Dio _dio;
 
@@ -32,9 +31,33 @@ class MyApi {
     return main.children[3].getElementsByTagName("table").map((Element e) {
       var node = NodeParent();
       node.parent = e.getElementsByTagName("span").first.innerHtml;
-      node.nodes = e.getElementsByTagName("a").map((e) => NodeLabel(e.attributes["href"],e.innerHtml)).toList();
+      node.nodes = e
+          .getElementsByTagName("a")
+          .map((e) => NodeLabel(e.attributes["href"], e.innerHtml))
+          .toList();
       return node;
     }).toList();
+  }
+
+  Future<List<TabData>> tabList() {
+    var doc = parse(rootHtml);
+    // var doc = parse();
+    var tabs = doc.getElementById("Tabs").getElementsByTagName("a");
+    var tabList =
+        tabs.map((Element e) => TabData(e.innerHtml, e.attributes["href"])).toList();
+    return Future.value(tabList);
+  }
+}
+
+class TabData {
+  String name;
+  String href;
+
+  TabData(this.name, this.href);
+
+  @override
+  String toString() {
+    return 'TabData{name: $name, href: $href}';
   }
 }
 
@@ -62,7 +85,8 @@ class NodeLabel {
 
 void main() async {
   MyApi myApi = MyApi._singleton;
-  var nodes = await myApi.nodes();
+  // var nodes = await myApi.nodes();
+  var nodes = await myApi.tabList();
   print(nodes);
 }
 

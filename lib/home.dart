@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/drawer.dart';
 import 'package:flutter_app/message/message.dart';
+import 'package:flutter_app/net/MyApi.dart';
 import 'package:flutter_app/node/node.dart';
 import 'package:flutter_app/topic/topic.dart';
 
@@ -49,6 +50,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         bottom: TabBar(
           tabs: tabs,
           controller: _tabController,
+          onTap: (value) async {
+            var tabs = await myApi.tabList();
+            print('hello');
+            showDialog<Dialog>(
+              context: context,
+              builder: (context) {
+                return Builder(
+                  builder: (context) => Wrap(
+                    children: tabs
+                        .map((TabData e) =>
+                            ActionChip(label: Text(e.name), onPressed: () {}))
+                        .toList(),
+                  ),
+                );
+              },
+            );
+          },
         ),
         actions: [
           IconButton(

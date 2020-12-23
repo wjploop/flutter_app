@@ -15,7 +15,9 @@ class ListPage<T> extends StatefulWidget {
 
   final IndexedWidgetBuilder itemBuilder;
 
-  ListPage(this.data, this.getData, this.itemBuilder);
+  bool enableLoadMore;
+
+  ListPage(this.data, this.getData, this.itemBuilder,{this.enableLoadMore = true});
 }
 
 class ListPageState<T> extends State<ListPage> {
@@ -87,7 +89,7 @@ class ListPageState<T> extends State<ListPage> {
       controller: _refreshController,
       onRefresh: _onRefresh,
       onLoading: _onLoading,
-      enablePullUp: true,
+      enablePullUp: widget.enableLoadMore,
       child: ListView.builder(
         itemCount: widget.data.length,
         itemBuilder: widget.itemBuilder,
