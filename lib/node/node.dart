@@ -34,11 +34,11 @@ class _NodePageState extends State<NodePage>
     return (BuildContext context, index) {
       NodeParent nodeParent = data[index];
       return Container(
-        margin: EdgeInsets.only(left: 12, right: 12,top: 8),
+        margin: EdgeInsets.only(left: 12, right: 12, top: 8),
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(top: 8,bottom: 8),
+              padding: EdgeInsets.only(top: 8, bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -89,8 +89,8 @@ class _NodePageState extends State<NodePage>
 }
 
 class ParentNode {
-  final Node parent;
-  final List<Node> children;
+  final TopicNode parent;
+  final List<TopicNode> children;
 
   ParentNode(this.parent, this.children);
 }

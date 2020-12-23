@@ -9,13 +9,13 @@ abstract class Api {
   factory Api(Dio dio) = _Api;
 
   @GET("/nodes/all.json")
-  Future<List<Node>> getNodes();
+  Future<List<TopicNode>> getNodes();
 
   @GET("/nodes/show.json")
-  Future<Node> showNodeById(@Query("id") String id);
+  Future<TopicNode> showNodeById(@Query("id") String id);
 
   @GET("/nodes/show.json")
-  Future<Node> showNodeByName(@Query("name") String name);
+  Future<TopicNode> showNodeByName(@Query("name") String name);
 }
 
 void main() async {

@@ -15,7 +15,7 @@ import 'package:flutter_app/data/node.dart';
 /// id : 735799
 
 class Topic {
-  Node node;
+  TopicNode node;
   Member member;
   String lastReplyBy;
   int lastTouched;
@@ -25,6 +25,7 @@ class Topic {
   String content;
   String contentRendered;
   int lastModified;
+  String lastTime;  // 可视化字符
   int replies;
   int id;
 
@@ -39,11 +40,12 @@ class Topic {
       this.content,
       this.contentRendered,
       this.lastModified,
+      this.lastTime,
       this.replies,
       this.id});
 
   Topic.fromJson(dynamic json) {
-    node = json["node"] != null ? Node.fromJson(json["node"]) : null;
+    node = json["node"] != null ? TopicNode.fromJson(json["node"]) : null;
     member = json["member"] != null ? Member.fromJson(json["member"]) : null;
     lastReplyBy = json["last_reply_by"];
     lastTouched = json["last_touched"];
@@ -53,6 +55,7 @@ class Topic {
     content = json["content"];
     contentRendered = json["content_rendered"];
     lastModified = json["last_modified"];
+    lastTime = json["last_time"];
     replies = json["replies"];
     id = json["id"];
   }
@@ -73,6 +76,7 @@ class Topic {
     map["content"] = content;
     map["content_rendered"] = contentRendered;
     map["last_modified"] = lastModified;
+    map["last_time"] = lastTime;
     map["replies"] = replies;
     map["id"] = id;
     return map;

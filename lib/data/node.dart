@@ -14,7 +14,7 @@
 /// id : 1
 /// parent_node_name : "v2ex"
 
-class Node {
+class TopicNode {
   String avatarLarge;
   String name;
   String avatarNormal;
@@ -30,7 +30,7 @@ class Node {
   int id;
   String parentNodeName;
 
-  Node(
+  TopicNode(
       {this.avatarLarge,
       this.name,
       this.avatarNormal,
@@ -46,7 +46,7 @@ class Node {
       this.id,
       this.parentNodeName});
 
-  Node.fromJson(dynamic json) {
+  TopicNode.fromJson(dynamic json) {
     avatarLarge = json["avatar_large"];
     name = json["name"];
     avatarNormal = json["avatar_normal"];

@@ -9,6 +9,25 @@ import 'package:flutter_app/topic/topic.dart';
 
 var homeKey = GlobalKey<ScaffoldState>();
 
+var _tabData = [
+  ["全部", "all"],
+  ["技术", "tech"],
+  ["创意", "creative"],
+  ["好玩", "play"],
+  ["Apple", "apple"],
+  ["酷工作", "jobs"],
+  ["交易", "deals"],
+  ["城市", "city"],
+  ["问与答", "qna"],
+  ["最热", "hot"],
+  ["R2", "r2"],
+  ["节点", "nodes"],
+  ["关注", "members"],
+];
+List<TabData> _tabList = _tabData.map((e) => TabData(e[0], e[1])).toList();
+
+int tabIndex = 0;
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -21,7 +40,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("全部"),
+                Text(_tabList[tabIndex].name),
                 RotationTransition(
                     turns: _iconTurn, child: Icon(Icons.expand_more))
               ],
@@ -59,23 +78,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   bool get _isValidForDrop => _tabController.index == 0;
 
   TabController _tabController;
-
-  static var _tabData = [
-    ["全部", "all"],
-    ["技术", "tech"],
-    ["创意", "creative"],
-    ["好玩", "play"],
-    ["Apple", "apple"],
-    ["酷工作", "jobs"],
-    ["交易", "deals"],
-    ["城市", "city"],
-    ["问与答", "qna"],
-    ["最热", "hot"],
-    ["R2", "r2"],
-    ["节点", "nodes"],
-    ["关注", "members"],
-  ];
-  List<TabData> _tabList = _tabData.map((e) => TabData(e[0], e[1])).toList();
 
   @override
   void initState() {
@@ -197,12 +199,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   childAspectRatio: 2.5,
                 ),
                 children: _tabList
-                    .map((e) =>
-                        Padding(
+                    .map((e) => Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: FlatButton(
-                            color: Theme.of(context).primaryColor,
-                              child: Text(e.name), onPressed: () {}),
+                              color: Theme.of(context).primaryColor,
+                              child: Text(e.name),
+                              onPressed: () {}),
                         ))
                     .toList(),
               ),
