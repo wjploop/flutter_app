@@ -11,12 +11,10 @@ class _MessagePageState extends State<MessagePage>
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      child: AutomaticKeepAlive(
-        child: Center(
-          child: RaisedButton(onPressed: (){
-            Navigator.of(context).pushNamed("/about");
-          },),
-        ),
+      child: Center(
+        child: RaisedButton(onPressed: (){
+          Navigator.of(context).pushNamed("/about");
+        },),
       ),
     );
   }

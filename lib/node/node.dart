@@ -60,7 +60,7 @@ class _NodePageState extends State<NodePage>
               alignment: Alignment.topLeft,
               child: Wrap(
                 spacing: 8,
-                runSpacing: 0,
+                runSpacing: 8,
                 alignment: WrapAlignment.start,
                 children: nodeParent.nodes
                     .map((e) => ActionChip(

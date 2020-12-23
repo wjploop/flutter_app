@@ -22,9 +22,9 @@ class MyApi {
   }
 
   Future<List<NodeParent>> nodes() async {
-    var html = await _dio.request(baseUrl).then((value) => value.data);
-    // var doc = parse(rootHtml);
-    var doc = parse(html);
+    // var html = await _dio.request(baseUrl).then((value) => value.data);
+    var doc = parse(rootHtml);
+    // var doc = parse(html);
     //#Main > div:nth-child(4) > div:nth-child(4) > table > tbody
     //*[@id="Main"]/div[4]/div[4]/table/tbody
     var main = doc.getElementById("Main");
