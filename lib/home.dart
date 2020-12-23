@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_app/drawer.dart';
 import 'package:flutter_app/message/message.dart';
 import 'package:flutter_app/net/MyApi.dart';
@@ -10,25 +12,6 @@ var homeKey = GlobalKey<ScaffoldState>();
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
-}
-
-class ArrowTab extends StatefulWidget {
-  bool drop;
-
-  @override
-  _ArrowTabState createState() => _ArrowTabState();
-}
-
-class Hello extends Tab {
-  @override
-  Widget get child => super.child;
-}
-
-class _ArrowTabState extends State<ArrowTab> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
@@ -63,7 +46,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       Tween<double>(begin: 0.0, end: 0.5);
 
   final ColorTween _backgroundColorTween =
-      ColorTween(begin: Colors.transparent, end: Colors.grey[50]);
+      ColorTween(begin: Colors.transparent, end: Colors.black12);
 
   Animation<double> _iconTurn;
   Animation<double> _heightFactor;
@@ -73,26 +56,24 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   bool _isExpanded = false;
 
-  bool get _isValidForDrop => _tabController.index==0;
+  bool get _isValidForDrop => _tabController.index == 0;
 
   TabController _tabController;
 
   static var _tabData = [
+    ["全部", "all"],
     ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
-    ["技术", "tech"],
+    ["创意", "creative"],
+    ["好玩", "play"],
+    ["Apple", "apple"],
+    ["酷工作", "jobs"],
+    ["交易", "deals"],
+    ["城市", "city"],
+    ["问与答", "qna"],
+    ["最热", "hot"],
+    ["R2", "r2"],
+    ["节点", "nodes"],
+    ["关注", "members"],
   ];
   List<TabData> _tabList = _tabData.map((e) => TabData(e[0], e[1])).toList();
 
@@ -100,7 +81,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     dropController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
     _heightFactor = dropController.drive(_easeInTween);
     _iconTurn = dropController.drive(_halfTween.chain(_easeInTween));
     _backgroundColor =
@@ -160,11 +141,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
         bottom: TabBar(
           tabs: tabs,
+          indicatorSize: TabBarIndicatorSize.label,
           controller: _tabController,
           onTap: (value) {
-            if(value==0) {
+            if (value == 0) {
               _reverseDrop();
-            }else{
+            } else {
               _dismissDrop();
             }
           },
@@ -183,10 +165,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           AnimatedBuilder(
             animation: dropController,
             builder: (context, child) {
-              final bool closed = _isExpanded && dropController.isDismissed;
+              final bool closed = !_isExpanded && dropController.isDismissed;
 
               return Offstage(
-              offstage: closed,
+                offstage: closed,
                 child: GestureDetector(
                   onTapDown: (detail) {
                     _dismissDrop();
@@ -196,21 +178,32 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     constraints: BoxConstraints.expand(),
                     alignment: Alignment.topCenter,
                     child: ClipRect(
-                      child:
-                          Align(heightFactor: _heightFactor.value, child: child),
+                      child: Align(
+                          heightFactor: _heightFactor.value, child: child),
                     ),
                   ),
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 6,
+            child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.all(8),
+              width: double.infinity,
+              child: GridView(
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 2.5,
+                ),
                 children: _tabList
                     .map((e) =>
-                        ActionChip(label: Text(e.name), onPressed: () {}))
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FlatButton(
+                            color: Theme.of(context).primaryColor,
+                              child: Text(e.name), onPressed: () {}),
+                        ))
                     .toList(),
               ),
             ),

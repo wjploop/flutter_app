@@ -32,7 +32,7 @@ class App extends StatelessWidget {
       enableBallisticLoad: true, // trigger load more by BallisticScrollActivity
       child: MaterialApp(
         title: 'Flutter Demo',
-        theme: ThemeData(primarySwatch: Colors.purple),
+        theme: ThemeData(primaryColor: Colors.grey[200],accentColor: Colors.black),
         // home: MyHomePage(title: 'Flutter Demo Home Page'),
         debugShowCheckedModeBanner: false,
         // onGenerateRoute: (settings) {
