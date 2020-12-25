@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/base/page.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/net/MyApi.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_app/home.dart';
 
 class TopicListPage extends StatefulWidget {
   final String tab;
@@ -13,10 +15,13 @@ class TopicListPage extends StatefulWidget {
 }
 
 class _TopicListPageState extends State<TopicListPage> {
+  String tab="";
   final data = <Topic>[];
-
   @override
   Widget build(BuildContext context) {
+    if(tab != tabList[context.watch<TabIndex>().index].href) {
+      context.findAncestorStateOfType<_TopicListPageState>().
+    }
     return ListPage(
       data,
       _getData,
@@ -26,7 +31,7 @@ class _TopicListPageState extends State<TopicListPage> {
   }
 
   Future<List<Topic>> _getData() {
-    return myApi.topic("");
+    return myApi.topic(tab);
   }
 
   IndexedWidgetBuilder getItemBuilder() {
