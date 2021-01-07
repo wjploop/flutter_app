@@ -11,9 +11,7 @@ MyApi get myApi => MyApi._singleton;
 class MyApi {
   Dio _dio;
 
-  String baseUrl = "https://www.v2ex.com/";
-
-  factory () {
+  factory() {
     return _singleton;
   }
 
@@ -32,10 +30,7 @@ class MyApi {
     var main = doc.getElementById("Main");
     return main.children[3].getElementsByTagName("table").map((Element e) {
       var node = NodeParent();
-      node.parent = e
-          .getElementsByTagName("span")
-          .first
-          .innerHtml;
+      node.parent = e.getElementsByTagName("span").first.innerHtml;
       node.nodes = e
           .getElementsByTagName("a")
           .map((e) => NodeLabel(e.attributes["href"], e.innerHtml))
@@ -45,54 +40,67 @@ class MyApi {
   }
 
   Future<List<TabData>> tabList() async {
-    var rootHtml = await _dio.request(baseUrl).then((value) => value.data);
+    var rootHtml = await _dio.request("/").then((value) => value.data);
     var doc = parse(rootHtml);
     // var doc = parse();
     var tabs = doc.getElementById("Tabs").getElementsByTagName("a");
-    var tabList =
-    tabs.map((Element e) => TabData(e.innerHtml, e.attributes["href"]))
+    var tabList = tabs
+        .map((Element e) => TabData(e.innerHtml, e.attributes["href"]))
         .toList();
     return Future.value(tabList);
   }
 
-  Future<List<Topic>> topic(String tab) {
+  Future<List<Topic>> topic(String tab, {int page = 0}) async {
+    print('tab= $tab');
+
+    Response response;
+    if (tab == "recent") {
+      response = await _dio.get("/?$tab?p=" + page.toString());
+    } else {
+      response = await _dio.get("/?$tab");
+    }
+    var rootHtml = response.data;
+
     var doc = parse(rootHtml);
     var main = doc.getElementById("Main");
-    var boxs = main.getElementsByClassName("box").first.getElementsByClassName(
-        "cell\ item");
+    var boxs = main
+        .getElementsByClassName("box")
+        .first
+        .getElementsByClassName("cell\ item");
     print(boxs);
     var topics = boxs.map((e) {
       var topic = Topic();
       topic.member = new Member();
       topic.node = new TopicNode();
-      topic.member.avatarMini = e.getElementsByClassName("avatar").first.attributes["src"];
-      var titleE =  e.getElementsByClassName("topic-link").first;
+      topic.member.avatarMini =
+          e.getElementsByClassName("avatar").first.attributes["src"];
+      var titleE = e.getElementsByClassName("topic-link").first;
       topic.title = titleE.innerHtml;
       topic.url = titleE.attributes["href"];
 
       var infoE = e.getElementsByClassName("topic_info").first;
       topic.node.title = infoE.getElementsByClassName("node").first.innerHtml;
-      topic.node.url = infoE.getElementsByClassName("node").first.attributes["href"];
+      topic.node.url =
+          infoE.getElementsByClassName("node").first.attributes["href"];
 
       topic.member.username = infoE.getElementsByTagName("a")[1].innerHtml;
       topic.member.url = infoE.getElementsByTagName("a")[1].attributes["href"];
 
       var lastReplyE = infoE.getElementsByTagName("span").first;
-      topic.lastModified = DateTime.parse(lastReplyE.attributes["title"]).millisecondsSinceEpoch;
+      topic.lastModified =
+          DateTime.parse(lastReplyE.attributes["title"]).millisecondsSinceEpoch;
       topic.lastTime = lastReplyE.innerHtml;
 
       var replyE = e.getElementsByClassName("count_livid");
-      if(replyE.isNotEmpty) {
-        topic.replies =int.parse(replyE.first.innerHtml);
-      }else{
+      if (replyE.isNotEmpty) {
+        topic.replies = int.parse(replyE.first.innerHtml);
+      } else {
         topic.replies = 0;
       }
       return topic;
     }).toList();
     return Future.value(topics);
   }
-
-
 }
 
 class TabData {

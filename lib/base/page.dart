@@ -5,6 +5,7 @@ import 'package:flutter_app/node/node.dart';
 import 'package:flutter_app/widgets/global_process.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+
 class ListPage<T> extends StatefulWidget {
   @override
   ListPageState<T> createState() => ListPageState();
@@ -17,7 +18,8 @@ class ListPage<T> extends StatefulWidget {
 
   bool enableLoadMore;
 
-  ListPage(this.data, this.getData, this.itemBuilder,{this.enableLoadMore = true});
+  ListPage(this.data, this.getData, this.itemBuilder,
+      {this.enableLoadMore = true});
 }
 
 class ListPageState<T> extends State<ListPage> {
@@ -27,7 +29,7 @@ class ListPageState<T> extends State<ListPage> {
       RefreshController(initialRefresh: true);
 
   void _onRefresh() async {
-    widget.getData().timeout(Duration(seconds: 10)).then((List<T> value) {
+    widget.getData().timeout(Duration(seconds: 50)).then((List<T> value) {
       if (mounted) {
         setState(() {
           if (value.isEmpty) {
@@ -38,7 +40,7 @@ class ListPageState<T> extends State<ListPage> {
           }
         });
       }
-    }).catchError((error) {
+    }).catchError((error,StackTrace stacktrace) {
       var errorStr = "";
       switch (error.runtimeType) {
         case TimeoutException:
@@ -47,9 +49,10 @@ class ListPageState<T> extends State<ListPage> {
           // errorStr = errorStr.runtimeType.toString();
           break;
       }
+      print(stacktrace);
       errorStr = error.runtimeType.toString();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorStr)));
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text(errorStr)));
+
     }).whenComplete(() {
       if (isFirstLoad) {
         isFirstLoad = false;

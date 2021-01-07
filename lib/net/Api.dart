@@ -1,10 +1,14 @@
+
 import 'package:dio/dio.dart';
 import 'package:flutter_app/data/node.dart';
 import 'package:retrofit/http.dart';
 
 part 'Api.g.dart';
 
-@RestApi(baseUrl: "https://www.v2ex.com/api/")
+const HOST = "https://www.v2ex.com";
+
+
+@RestApi(baseUrl: "${HOST}/api/")
 abstract class Api {
   factory Api(Dio dio) = _Api;
 
@@ -22,8 +26,6 @@ void main() async {
   // print(api()==api());
   // print(api());
 
-
-
   api.showNodeById("1").then((value) => print(value));
 
   var m1 = Net();
@@ -31,7 +33,6 @@ void main() async {
   print(m1);
   print(m1.dio == m2.dio);
 }
-
 
 // Api api() => Net().api;
 
@@ -53,12 +54,11 @@ void main() async {
 
 Api get api => Net().api;
 
-
 class Net {
   Dio dio;
   Api api;
 
-  static final Net _singleton =  Net._internal();
+  static final Net _singleton = Net._internal();
 
   factory Net() {
     return _singleton;
@@ -67,14 +67,20 @@ class Net {
   Net._internal() {
     dio = createDio();
     api = Api(dio);
-    
   }
 }
 
 Api createApi() {}
 
 Dio createDio() {
-  var dio = Dio();
-  dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: true,requestHeader:false,responseHeader: false));
+  var dio = Dio(BaseOptions(
+    baseUrl: HOST
+  ));
+  dio.interceptors.add(LogInterceptor(
+      requestBody: false,
+      responseBody: false,
+      requestHeader: true,
+      request: true,
+      responseHeader: false));
   return dio;
 }

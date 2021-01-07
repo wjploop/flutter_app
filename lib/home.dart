@@ -50,7 +50,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   // int index = 0;
 
   List<Tab> tabs() {
-    print('home state index = ${context.watch<TabIndex>().index}');
     return <Tab>[
       Tab(
         child: Center(
