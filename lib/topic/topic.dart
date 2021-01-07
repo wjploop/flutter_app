@@ -6,6 +6,7 @@ import 'package:flutter_app/base/page.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/net/MyApi.dart';
 import 'package:flutter_app/pages/page_recent_topic.dart';
+import 'package:flutter_app/pages/page_topic_detail.dart';
 import 'package:flutter_app/widgets/global_process.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/home.dart';
@@ -75,7 +76,11 @@ class _TopicListPageState extends State<TopicListPage> {
         child: Center(child: Text("更多话题 >>")),
       ),
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => RecentTopicPage(),));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecentTopicPage(),
+            ));
       },
     );
   }
@@ -86,7 +91,7 @@ class _TopicListPageState extends State<TopicListPage> {
       future: _topicListFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          print('wolf: load data ${snapshot.data}');
+          // print('wolf: load data ${snapshot.data}');
           return RefreshIndicator(
             onRefresh: () {
               setState(() {
@@ -190,7 +195,13 @@ class _TopicItemViewState extends State<TopicItemView> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => TopicDetailPage(
+            topic: topic,
+          ),
+        ));
+      },
       child: Container(
         padding: EdgeInsets.only(top: 8, left: 8, right: 8),
         child: Column(
@@ -269,7 +280,6 @@ class _TopicItemViewState extends State<TopicItemView> {
     );
   }
 }
-
 
 class LoadingView extends StatelessWidget {
   @override

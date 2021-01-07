@@ -67,7 +67,7 @@ class MyApi {
         .getElementsByClassName("box")
         .first
         .getElementsByClassName("cell\ item");
-    print(boxs);
+    // print(boxs);
     var topics = boxs.map((e) {
       var topic = Topic();
       topic.member = new Member();

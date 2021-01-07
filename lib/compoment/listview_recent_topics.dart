@@ -11,7 +11,7 @@ class ListViewRecentTopics extends StatefulWidget {
 class _ListViewRecentTopicsState extends State<ListViewRecentTopics> {
   int p = 1;
   bool isUpLoading = false;
-  List<Topic> items = List();
+  List<Topic> items = [];
   ScrollController _scrollController = ScrollController();
 
   _getTopics() async {
@@ -48,6 +48,12 @@ class _ListViewRecentTopicsState extends State<ListViewRecentTopics> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (items.length > 0) {
       return RefreshIndicator(
@@ -56,9 +62,11 @@ class _ListViewRecentTopicsState extends State<ListViewRecentTopics> {
           itemCount: items.length + 1,
           itemBuilder: (context, index) {
             if (index == items.length) {
-              return Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Text("加载第${p}页"),
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Text("加载第${p}页"),
+                ),
               );
             } else {
               return TopicItemView(topic: items[index]);
