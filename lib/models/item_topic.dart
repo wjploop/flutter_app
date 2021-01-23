@@ -4,5 +4,4 @@ class TopicItem {
   String topicContent ='';
   String memberId = '';
 
-
 }
