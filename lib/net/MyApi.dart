@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_app/data/member.dart';
 import 'package:flutter_app/data/node.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/data/topic_detail.dart';
 import 'package:flutter_app/net/Api.dart';
-import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-
+import 'package:html/dom.dart' as dom;
 MyApi get myApi => MyApi._singleton;
 
 class MyApi {
@@ -29,7 +29,7 @@ class MyApi {
     //#Main > div:nth-child(4) > div:nth-child(4) > table > tbody
     //*[@id="Main"]/div[4]/div[4]/table/tbody
     var main = doc.getElementById("Main");
-    return main.children[3].getElementsByTagName("table").map((Element e) {
+    return main.children[3].getElementsByTagName("table").map((dom.Element e) {
       var node = NodeParent();
       node.parent = e.getElementsByTagName("span").first.innerHtml;
       node.nodes = e
@@ -46,7 +46,7 @@ class MyApi {
     // var doc = parse();
     var tabs = doc.getElementById("Tabs").getElementsByTagName("a");
     var tabList = tabs
-        .map((Element e) => TabData(e.innerHtml, e.attributes["href"]))
+        .map((dom.Element e) => TabData(e.innerHtml, e.attributes["href"]))
         .toList();
     return Future.value(tabList);
   }
@@ -77,7 +77,8 @@ class MyApi {
           e.getElementsByClassName("avatar").first.attributes["src"];
       var titleE = e.getElementsByClassName("topic-link").first;
       topic.title = titleE.innerHtml;
-      topic.url = titleE.attributes["href"];
+      var href = titleE.attributes["href"];
+      topic.url = href.substring(href.indexOf("/t/") + 3);
 
       var infoE = e.getElementsByClassName("topic_info").first;
       topic.node.title = infoE.getElementsByClassName("node").first.innerHtml;
@@ -103,7 +104,7 @@ class MyApi {
     return Future.value(topics);
   }
 
-  Future<TopicDetail> topicDetail(String topicId, int page) async{
+  Future<TopicDetail> topicDetail(String topicId, int page) async {
     var response = await _dio.get("/t/${topicId}?p=${page.toString()}");
     // var response = detailHtml;
 
@@ -114,15 +115,21 @@ class MyApi {
 
     var main = doc.getElementById("Main");
 
-
-    var boxes  = main.getElementsByClassName("box");
+    var boxes = main.getElementsByClassName("box");
     var topic = boxes[0];
     var replies = boxes[1];
 
     // #Main > div:nth-child(2) > div.header > small
     // <a href="/member/foxyier">foxyier</a> · <span title="2021-01-22 14:59:21 +08:00">5 小时 12 分钟前</span> · 253 次点击
     // foxyier · 5 小时 12 分钟前 · 253 次点击
-    var author_created_views = main.getElementsByClassName("header").first.getElementsByTagName("small").first.text.split(" · ").toList();
+    var author_created_views = main
+        .getElementsByClassName("header")
+        .first
+        .getElementsByTagName("small")
+        .first
+        .text
+        .split(" · ")
+        .toList();
     detail.created = author_created_views[1];
     detail.views = author_created_views[2];
 
@@ -131,9 +138,11 @@ class MyApi {
     // print(detail.views);
 
     var html_content_parent = main.getElementsByClassName("cell");
-    detail.hasContent = html_content_parent !=null;
-    if(detail.hasContent) {
-      var html_content = html_content_parent.first.getElementsByClassName("topic_content").first;
+    detail.hasContent = html_content_parent != null;
+    if (detail.hasContent) {
+      var html_content = html_content_parent.first
+          .getElementsByClassName("topic_content")
+          .first;
       detail.content = html_content.text;
       detail.contentHtml = html_content.innerHtml;
       print(detail.content);
@@ -141,7 +150,7 @@ class MyApi {
     }
 
     var html_supplements = main.getElementsByClassName("subtle");
-    if(html_supplements!=null) {
+    if (html_supplements != null) {
       html_supplements.forEach((e) {
         Supplement supplement = new Supplement();
         supplement.created = e.querySelector("span.fade>span").text;
@@ -152,13 +161,40 @@ class MyApi {
       });
     }
 
+    if (main.querySelector("#no-comments-yet") == null) {
+      var reply_text = replies.querySelector("div.cell>span.gray").text;
+      detail.replySize =
+          int.parse(reply_text.substring(0, reply_text.indexOf(" ") + 1));
+
+      replies.getElementsByClassName("cell").sublist(1).forEach((element) {
+        ReplyItem replyItem = new ReplyItem();
+        var html_avatar = element.querySelector("img.avatar");
+        if(html_avatar?.attributes!=null) {
+          replyItem.avatar = html_avatar.attributes["src"];
+        }
+        replyItem.username = element.querySelector("strong")?.text;
+        replyItem.lastReplyTime = element.querySelector("span.ago")?.text;
+        var html_replay_content = element.querySelector("div.reply_content");
+        if(html_replay_content !=null) {
+          replyItem.content = html_replay_content.text;
+          replyItem.contentHtml = html_replay_content.innerHtml;
+          if (replyItem.content.indexOf("@") == 0) {
+            replyItem.replyId = html_replay_content.querySelector("a").text;
+          }
+        }
+        if(element.querySelector("span.no")==null) {
+          print(element.innerHtml);
+        }
+
+        replyItem.floor = element.querySelector("span.no").text;
+        // replyItem.favorites =
+        //     element.querySelector("span.small\ fade").text.trim();
+        detail.replies.add(replyItem);
+      });
+    }
     // 评论
 
-
-
     return detail;
-
-
   }
 }
 
@@ -200,7 +236,7 @@ void main() async {
   MyApi myApi = MyApi._singleton;
   // var nodes = await myApi.nodes();
   // var nodes = await myApi.topic("tech");
-  var nodes = await myApi.topicDetail("747608",0);
+  var nodes = await myApi.topicDetail("747608", 0);
   print(nodes);
 }
 

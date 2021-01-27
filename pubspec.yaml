@@ -23,6 +23,7 @@ dependencies:
   retrofit: any
   logger: any #for logging purpose
   provider: ^4.3.2+3
+  flutter_html: ^1.2.0
 
 
   cached_network_image: ^2.2.0+1 # https://pub.dartlang.org/packages/cached_network_image
