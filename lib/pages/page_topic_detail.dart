@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/data/topic_detail.dart';
 import 'package:flutter_app/net/MyApi.dart';
@@ -24,21 +25,34 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
   @override
   void initState() {
     super.initState();
-
+    // todo Scroller可以用使用全局的，这样可以实现全局左滑返回效果
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        print('try to loading more comment');
+        if(_replyList.length > 0 && page <= maxPage) {
+          _getData();
+        }else{
+          print('no more comment');
+          HapticFeedback.heavyImpact();
+        }
+      }
+    });
     _getData();
   }
 
   @override
   void didChangeDependencies() {
+
     super.didChangeDependencies();
-    _scrollController = PrimaryScrollController.of(context);
   }
 
   bool isLoading = false;
   int page = 1;
   int maxPage = 1;
 
-  Future _getData() async {
+  Future _getData({bool isRefresh= false} ) async {
+
     if (isLoading) {
       return;
     }
@@ -49,8 +63,16 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
 
     setState(() {
       _detailModel = topicDetail;
+      if(isRefresh){
+        _detailModel.replies.clear();
+      }
       _replyList.addAll(_detailModel.replies);
       isLoading = false;
+      // 加载第一页时，获取该详情的评论个数
+      if(page == 2){
+        maxPage =topicDetail.replySize;
+        print('comments has $maxPage pages');
+      }
     });
   }
 
@@ -67,7 +89,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
         title: Text("话题"),
       ),
       body: RefreshIndicator(
-        onRefresh: () {},
+        onRefresh: () => _getData(isRefresh: true),
         child: SingleChildScrollView(
           controller: _scrollController,
           child: Column(
