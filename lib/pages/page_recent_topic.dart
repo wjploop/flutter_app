@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/compoment/listview_recent_topics.dart';
+import 'package:flutter_app/component/listview_recent_topics.dart';
 
 class RecentTopicPage extends StatefulWidget {
   @override

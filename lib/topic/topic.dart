@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/base/page.dart';
+import 'package:flutter_app/component/circle_avatar_network.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/net/MyApi.dart';
 import 'package:flutter_app/pages/page_recent_topic.dart';
@@ -214,11 +215,7 @@ class _TopicItemViewState extends State<TopicItemView> {
                 children: [
                   Row(
                     children: [
-                      ClipOval(
-                        child: Image.network(topic.member.avatarMini,
-                            width: 32, height: 32),
-                        // Image.asset("avatar.png"),
-                      ),
+                      CircleAvatarNetwork(topic.member.avatarMini, 32),
                       SizedBox(
                         width: 8,
                       ),

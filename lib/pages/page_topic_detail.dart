@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/component/circle_avatar_network.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/data/topic_detail.dart';
 import 'package:flutter_app/net/MyApi.dart';
@@ -110,11 +111,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
         children: [
           Row(
             children: [
-              ClipOval(
-                child: Image.network(topic.member.avatarMini,
-                    width: 48, height: 48),
-                // Image.asset("avatar.png"),
-              ),
+              CircleAvatarNetwork(topic.member.avatarMini,48),
               SizedBox(
                 width: 6,
               ),
@@ -195,12 +192,7 @@ class _TopicDetailPageState extends State<TopicDetailPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipOval(
-                child: Image.network(
-              item.avatar,
-              width: 32,
-              height: 32,
-            )),
+            CircleAvatarNetwork(item.avatar, 32),
             SizedBox(width: 12,),
             Expanded(
               flex: 1,
