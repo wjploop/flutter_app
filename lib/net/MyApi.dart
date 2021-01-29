@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_app/data/member.dart';
 import 'package:flutter_app/data/node.dart';
+import 'package:flutter_app/data/node_detail.dart';
 import 'package:flutter_app/data/topic.dart';
 import 'package:flutter_app/data/topic_detail.dart';
 import 'package:flutter_app/net/Api.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
+
+import 'dart:async';
+
 MyApi get myApi => MyApi._singleton;
 
 class MyApi {
@@ -48,7 +51,7 @@ class MyApi {
     var tabList = tabs
         .map((dom.Element e) => TabData(e.innerHtml, e.attributes["href"]))
         .toList();
-    return Future.value(tabList);
+    return tabList;
   }
 
   Future<List<Topic>> topic(String tab, {int page = 0}) async {
@@ -69,39 +72,57 @@ class MyApi {
         .first
         .getElementsByClassName("cell\ item");
     // print(boxs);
-    var topics = boxs.map((e) {
-      var topic = Topic();
-      topic.member = new Member();
-      topic.node = new TopicNode();
-      topic.member.avatarMini =
-          e.getElementsByClassName("avatar").first.attributes["src"];
-      var titleE = e.getElementsByClassName("topic-link").first;
-      topic.title = titleE.innerHtml;
-      var href = titleE.attributes["href"];
-      topic.url = href.substring(href.indexOf("/t/") + 3);
+    var topics = boxs
+        .map((e) {
+          _parseElement(e);
+        })
+        .takeWhile((value) => value == null)
+        .toList();
+    return topics;
+  }
 
-      var infoE = e.getElementsByClassName("topic_info").first;
-      topic.node.title = infoE.getElementsByClassName("node").first.innerHtml;
-      topic.node.url =
-          infoE.getElementsByClassName("node").first.attributes["href"];
+  Topic _parseElement(dom.Element e) {
+    // 该节点不是话题，过滤掉
+    if (e.attributes["async"] != null) {
+      return null;
+    }
+    var topic = Topic();
+    topic.member = new Member();
+    topic.node = new TopicNode();
 
-      topic.member.username = infoE.getElementsByTagName("a")[1].innerHtml;
-      topic.member.url = infoE.getElementsByTagName("a")[1].attributes["href"];
+    topic.member.avatarMini =
+        e.getElementsByClassName("avatar").first.attributes["src"];
+    if (e.getElementsByClassName("topic-link").isEmpty) {
+      print('e$e');
+    }
+    var titleE = e.getElementsByClassName("topic-link").first;
+    topic.title = titleE.innerHtml;
+    var href = titleE.attributes["href"];
+    topic.url = href.substring(href.indexOf("/t/") + 3);
 
-      var lastReplyE = infoE.getElementsByTagName("span").first;
-      topic.lastModified =
-          DateTime.parse(lastReplyE.attributes["title"]).millisecondsSinceEpoch;
-      topic.lastTime = lastReplyE.innerHtml;
+    var infoE = e.getElementsByClassName("topic_info").first;
+    // 在首页存在该话题归属于哪个节点，而在节点详情页面没有信息
+    var html_node = infoE.getElementsByClassName("node");
+    if (html_node.isNotEmpty) {
+      topic.node.title = html_node.first.innerHtml;
+      topic.node.url = html_node.first.attributes["href"];
+    }
 
-      var replyE = e.getElementsByClassName("count_livid");
-      if (replyE.isNotEmpty) {
-        topic.replies = int.parse(replyE.first.innerHtml);
-      } else {
-        topic.replies = 0;
-      }
-      return topic;
-    }).toList();
-    return Future.value(topics);
+    topic.member.username = infoE.getElementsByTagName("a")[1].innerHtml;
+    topic.member.url = infoE.getElementsByTagName("a")[1].attributes["href"];
+
+    var lastReplyE = infoE.getElementsByTagName("span").first;
+    topic.lastModified =
+        DateTime.parse(lastReplyE.attributes["title"]).millisecondsSinceEpoch;
+    topic.lastTime = lastReplyE.innerHtml;
+
+    var replyE = e.getElementsByClassName("count_livid");
+    if (replyE.isNotEmpty) {
+      topic.replies = int.parse(replyE.first.innerHtml);
+    } else {
+      topic.replies = 0;
+    }
+    return topic;
   }
 
   Future<TopicDetail> topicDetail(String topicId, int page) async {
@@ -169,20 +190,20 @@ class MyApi {
       replies.getElementsByClassName("cell").sublist(1).forEach((element) {
         ReplyItem replyItem = new ReplyItem();
         var html_avatar = element.querySelector("img.avatar");
-        if(html_avatar?.attributes!=null) {
+        if (html_avatar?.attributes != null) {
           replyItem.avatar = html_avatar.attributes["src"];
         }
         replyItem.username = element.querySelector("strong")?.text;
         replyItem.lastReplyTime = element.querySelector("span.ago")?.text;
         var html_replay_content = element.querySelector("div.reply_content");
-        if(html_replay_content !=null) {
+        if (html_replay_content != null) {
           replyItem.content = html_replay_content.text;
           replyItem.contentHtml = html_replay_content.innerHtml;
           if (replyItem.content.indexOf("@") == 0) {
             replyItem.replyId = html_replay_content.querySelector("a").text;
           }
         }
-        if(element.querySelector("span.no")==null) {
+        if (element.querySelector("span.no") == null) {
           print(element.innerHtml);
         }
 
@@ -193,6 +214,34 @@ class MyApi {
       });
     }
     // 评论
+    return detail;
+  }
+
+  Future<NodeDetail> nodeDetail(String nodeId, int page) async {
+    var detail = new NodeDetail();
+    var response = await _dio.get("/go/${nodeId}?p=${page.toString()}");
+    var doc = parse(response.data);
+    detail.nodeId = nodeId;
+
+    var html_main = doc.getElementById("Main");
+    var html_boxes = html_main.getElementsByClassName("box");
+
+    var html_header = html_boxes[0];
+    detail.nodeImage = html_header
+        .querySelector("div.page-content-header>img")
+        .attributes["src"];
+    detail.introduce = html_header.querySelector("div.intro").text;
+    detail.topicSize = int.parse(
+        html_header.querySelector("span.topic-count>strong").text.trim());
+
+    var html_topics = html_boxes[1];
+    detail.topics =
+        html_topics.querySelector("#TopicsNode").children.map((element) {
+      _parseElement(element);
+    }).toList();
+
+    detail.favoriteMemberSize = int.parse(
+        html_topics.querySelector("div.cell\ flex-one-row > div").text);
 
     return detail;
   }
@@ -236,7 +285,8 @@ void main() async {
   MyApi myApi = MyApi._singleton;
   // var nodes = await myApi.nodes();
   // var nodes = await myApi.topic("tech");
-  var nodes = await myApi.topicDetail("747608", 0);
+  // var nodes = await myApi.topicDetail("747608", 0);
+  var nodes = await myApi.nodeDetail("qna", 1);
   print(nodes);
 }
 
